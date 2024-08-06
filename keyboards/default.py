@@ -13,3 +13,10 @@ def phone_button():
     btn1 = KeyboardButton("Telefon raqamni yuborish", request_contact=True)
     markup.add(btn1)
     return markup
+
+
+def location_button():
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    btn1 = KeyboardButton("Lokatsiya yuborish", request_location=True)
+    markup.add(btn1)
+    return markup

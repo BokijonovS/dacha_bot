@@ -4,6 +4,8 @@ from telebot.types import Message, ReplyKeyboardRemove
 
 from functions.user_checker import name_checker
 from keyboards.default import phone_button
+from keyboards.inline import menu_buttons
+
 
 
 USER_DATA = {}
@@ -51,5 +53,6 @@ def save_user(message: Message):
     user.phone_number = phone_number
     user.save()
     del USER_DATA[from_user_id]
-    bot.send_message(chat_id, "Botga xush kelibsiz", reply_markup=ReplyKeyboardRemove())
+    bot.send_message(chat_id, "Ro'yxatdan o'tdingiz", reply_markup=ReplyKeyboardRemove())
+    bot.send_message(chat_id, "Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons())
 
