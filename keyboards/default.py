@@ -16,7 +16,16 @@ def phone_button():
 
 
 def location_button():
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    markup = ReplyKeyboardMarkup(resize_keyboard=True, row_width=1)
     btn1 = KeyboardButton("Lokatsiya yuborish", request_location=True)
+    btn2 = KeyboardButton("Ortga")
     markup.add(btn1)
+    markup.add(btn2)
+    return markup
+
+
+def back_button():
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    btn = KeyboardButton("Ortga")
+    markup.add(btn)
     return markup

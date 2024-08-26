@@ -56,3 +56,9 @@ def save_user(message: Message):
     bot.send_message(chat_id, "Ro'yxatdan o'tdingiz", reply_markup=ReplyKeyboardRemove())
     bot.send_message(chat_id, "Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons())
 
+
+@bot.message_handler(func=lambda message: message.text == "Bosh menyu")
+def menu(message: Message):
+    chat_id = message.chat.id
+    bot.send_message(chat_id, "Bosh menyuga qaytdingiz", reply_markup=ReplyKeyboardRemove())
+    bot.send_message(chat_id, "China botga hush kelibsiz", reply_markup=menu_buttons())

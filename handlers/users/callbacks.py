@@ -2,8 +2,8 @@ from data.loader import bot
 from telebot.types import Message, CallbackQuery, ReplyKeyboardRemove
 from bot.models import Feedback, TgUser
 
-from keyboards.inline import menu_buttons, back_button, setting_buttons
-from keyboards.default import location_button
+from keyboards.inline import menu_buttons, setting_buttons
+from keyboards.default import location_button, back_button
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'uzbek')
@@ -13,11 +13,11 @@ def reaction_to_language(call: CallbackQuery):
     bot.send_message(chat_id, 'China shop boti ochildi', reply_markup=menu_buttons())
 
 
-# @bot.callback_query_handler(func=lambda call: call.data == 'shop')
-# def shop_open(call: CallbackQuery):
-#     chat_id = call.message.chat.id
-#     bot.delete_message(chat_id, call.message.message_id)
-#     bot.send_message(chat_id, 'Dokon ochildi', reply_markup=menu_buttons())
+@bot.callback_query_handler(func=lambda call: call.data == 'back')
+def reaction_to_language(call: CallbackQuery):
+    chat_id = call.message.chat.id
+    bot.delete_message(chat_id, call.message.message_id)
+    bot.send_message(chat_id, 'China shop boti ochildi', reply_markup=menu_buttons())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'feedback')
@@ -30,17 +30,15 @@ def feedback(call: CallbackQuery):
 
 def save_feedback(message: Message):
     chat_id = message.chat.id
-    user_id = message.from_user.id
-    tguser = TgUser.objects.get(telegram_id=user_id)
-    Feedback.objects.create(user=tguser, text=message.text)
-    bot.send_message(chat_id, "Fikringiz uchun raxmat💥")
-
-
-@bot.callback_query_handler(func=lambda call: call.data == 'back')
-def back(call: CallbackQuery):
-    chat_id = call.message.chat.id
-    bot.delete_message(chat_id, call.message.message_id)
-    bot.send_message(chat_id, "China shop boti ochildi", reply_markup=menu_buttons())
+    if message.text == "Ortga":
+        bot.send_message(chat_id, "Bosh menyuga qaytildi", reply_markup=ReplyKeyboardRemove())
+        bot.send_message(chat_id, "China shop", reply_markup=menu_buttons())
+    else:
+        user_id = message.from_user.id
+        tguser = TgUser.objects.get(telegram_id=user_id)
+        Feedback.objects.create(user=tguser, text=message.text)
+        bot.send_message(chat_id, "Fikringiz uchun raxmat💥", reply_markup=ReplyKeyboardRemove())
+        bot.send_message(chat_id, "China shop", reply_markup=menu_buttons())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'settings')
@@ -54,24 +52,34 @@ def back(call: CallbackQuery):
 def change_number(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
-    msg = bot.send_message(chat_id, "Yangi raqamni kiriting")
+    msg = bot.send_message(chat_id, "Yangi raqamni kiriting", reply_markup=back_button())
     bot.register_next_step_handler(msg, number_changer)
 
 
 def number_changer(message: Message):
     chat_id = message.chat.id
     user_id = message.from_user.id
-    phone_number = ""
-    if message.text.startswith('+998') and len(message.text) == 13 and message.text[1:].isdigit():
+
+    if message.text == "Ortga":
+        bot.send_message(chat_id, "Ortga qaytildi", reply_markup=ReplyKeyboardRemove())
+        bot.send_message(chat_id, "China  shop", reply_markup=setting_buttons())
+        return
+    elif message.text.startswith('+998') and len(message.text) == 13 and message.text[1:].isdigit():
         phone_number = message.text
     else:
         msg = bot.send_message(chat_id, "Telefon raqamni qaytadan kiriting!")
         bot.register_next_step_handler(msg, number_changer)
+        return  # Stop further execution if the number is invalid
 
-    tguser = TgUser.objects.get(telegram_id=user_id)
-    tguser.phone_number = phone_number
-    tguser.save()
-    bot.send_message(chat_id, "Telefon raqam o'zgartirildi", reply_markup=setting_buttons())
+    try:
+        tguser = TgUser.objects.get(telegram_id=user_id)
+        tguser.phone_number = phone_number
+        tguser.save()
+        bot.send_message(chat_id, "Telefon raqam o'zgartirildi", reply_markup=setting_buttons())
+    except TgUser.DoesNotExist:
+        bot.send_message(chat_id, "Foydalanuvchi topilmadi.")
+    except Exception as e:
+        bot.send_message(chat_id, f"Xatolik yuz berdi: {str(e)}")
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'location')
@@ -84,10 +92,24 @@ def insert_location(call: CallbackQuery):
 
 def location_save(message: Message):
     chat_id = message.chat.id
-    user_id = message.from_user.id
-    user = TgUser.objects.get(telegram_id=user_id)
-    user.location_lat = message.location.latitude
-    user.location_long = message.location.longitude
-    user.save()
-    bot.send_message(chat_id, "Lokatsiya saqlandi", reply_markup=ReplyKeyboardRemove())
-    bot.send_message(chat_id, "Sozlamalar", reply_markup=setting_buttons())
+    if message.location:
+        user_id = message.from_user.id
+        user = TgUser.objects.get(telegram_id=user_id)
+        user.location_lat = message.location.latitude
+        user.location_long = message.location.longitude
+        user.save()
+        bot.send_message(chat_id, "Lokatsiya saqlandi", reply_markup=ReplyKeyboardRemove())
+        bot.send_message(chat_id, "Sozlamalar", reply_markup=setting_buttons())
+    elif message.text:
+        if message.text == "Ortga":
+            bot.send_message(chat_id, "Ortga qaytildi", reply_markup=ReplyKeyboardRemove())
+            bot.send_message(chat_id, "Sozlamalar", reply_markup=setting_buttons())
+            return
+        else:
+            msg = bot.send_message(chat_id, "lokatsiyangizni qaytadan jonating!")
+            bot.register_next_step_handler(msg, location_save)
+            return
+    else:
+        msg = bot.send_message(chat_id, "lokatsiyangizni qaytadan jonating!")
+        bot.register_next_step_handler(msg, location_save)
+        return
