@@ -6,6 +6,7 @@ from django.db import models
 
 
 class TgUser(models.Model):
+    uuid = models.CharField(max_length=36, unique=True, null=True)
     telegram_id = models.CharField(max_length=100, unique=True)
     name = models.CharField(max_length=100, null=True, blank=True)
     phone_number = models.CharField(max_length=100, null=True, blank=True)

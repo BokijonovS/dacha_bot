@@ -54,7 +54,7 @@ def save_user(message: Message):
     user.save()
     del USER_DATA[from_user_id]
     bot.send_message(chat_id, "Ro'yxatdan o'tdingiz", reply_markup=ReplyKeyboardRemove())
-    bot.send_message(chat_id, "Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons())
+    bot.send_photo(chat_id, photo="sources/img.png", caption="Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons())
 
 
 @bot.message_handler(func=lambda message: message.text == "Bosh menyu")

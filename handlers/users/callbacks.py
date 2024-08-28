@@ -10,14 +10,18 @@ from keyboards.default import location_button, back_button
 def reaction_to_language(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
-    bot.send_message(chat_id, 'China shop boti ochildi', reply_markup=menu_buttons())
+    photo_path = "sources/img.png"
+    caption = "Chinashop bot eng zor tanlov!"
+    bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'back')
 def reaction_to_language(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
-    bot.send_message(chat_id, 'China shop boti ochildi', reply_markup=menu_buttons())
+    photo_path = "sources/img.png"
+    caption = "Chinashop bot eng zor tanlov!"
+    bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'feedback')
@@ -32,7 +36,9 @@ def save_feedback(message: Message):
     chat_id = message.chat.id
     if message.text == "Ortga":
         bot.send_message(chat_id, "Bosh menyuga qaytildi", reply_markup=ReplyKeyboardRemove())
-        bot.send_message(chat_id, "China shop", reply_markup=menu_buttons())
+        photo_path = "sources/img.png"
+        caption = "Chinashop bot eng zor tanlov!"
+        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
     else:
         user_id = message.from_user.id
         tguser = TgUser.objects.get(telegram_id=user_id)
