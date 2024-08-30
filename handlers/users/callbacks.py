@@ -6,22 +6,40 @@ from keyboards.inline import menu_buttons, setting_buttons
 from keyboards.default import location_button, back_button
 
 
-@bot.callback_query_handler(func=lambda call: call.data == 'uzbek')
+@bot.callback_query_handler(func=lambda call: call.data == 'change_name')
 def reaction_to_language(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
-    photo_path = "sources/img.png"
-    caption = "Chinashop bot eng zor tanlov!"
-    bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
+    msg = bot.get_message(chat_id, "Ismingizni kiriting!", reply_markup=back_button())
+    bot.register_next_step_handler(msg, save_name())
+
+
+def save_name(message: Message):
+    chat_id = message.chat.id
+    user_tg_id = message.from_user.id
+    user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
+    if message.text == "Ortga":
+        bot.send_message(chat_id, "Bosh menyuga qaytildi", reply_markup=ReplyKeyboardRemove())
+        photo_path = "sources/img.png"
+        caption = "Chinashop bot eng zor tanlov!"
+        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons(user_uuid))
+    else:
+        user = TgUser.objects.get(telegram_id=message.from_user.id)
+        name = message.text
+        user.name = name
+        user.save()
+        bot.send_message()
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'back')
-def reaction_to_language(call: CallbackQuery):
+def reaction_to_back(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
     photo_path = "sources/img.png"
     caption = "Chinashop bot eng zor tanlov!"
-    bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
+    user_tg_id = call.message.from_user.id
+    user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
+    bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons(user_uuid))
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'feedback')
@@ -34,21 +52,23 @@ def feedback(call: CallbackQuery):
 
 def save_feedback(message: Message):
     chat_id = message.chat.id
+    user_tg_id = message.from_user.id
+    user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
     if message.text == "Ortga":
         bot.send_message(chat_id, "Bosh menyuga qaytildi", reply_markup=ReplyKeyboardRemove())
         photo_path = "sources/img.png"
         caption = "Chinashop bot eng zor tanlov!"
-        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
+        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons(user_uuid))
     else:
         user_id = message.from_user.id
         tguser = TgUser.objects.get(telegram_id=user_id)
         Feedback.objects.create(user=tguser, text=message.text)
         bot.send_message(chat_id, "Fikringiz uchun raxmat💥", reply_markup=ReplyKeyboardRemove())
-        bot.send_message(chat_id, "China shop", reply_markup=menu_buttons())
+        bot.send_message(chat_id, "China shop", reply_markup=menu_buttons(user_uuid))
 
 
 @bot.callback_query_handler(func=lambda call: call.data == 'settings')
-def back(call: CallbackQuery):
+def settings(call: CallbackQuery):
     chat_id = call.message.chat.id
     bot.delete_message(chat_id, call.message.message_id)
     bot.send_message(chat_id, "Sozlamalar", reply_markup=setting_buttons())

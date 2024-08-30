@@ -20,6 +20,8 @@ def start(message: Message):
         bot.send_message(chat_id, "Assalomu alekum hush kelibsiz!", reply_markup=ReplyKeyboardRemove())
         photo_path = "sources/img.png"
         caption = "Chinashop bot eng zor tanlov!"
-        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons())
+        user_tg_id = message.from_user.id
+        user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
+        bot.send_photo(chat_id, photo=open(photo_path, 'rb'), caption=caption, reply_markup=menu_buttons(user_uuid))
     else:
         bot.send_message(chat_id, "Royxatdan oting", reply_markup=register_button())

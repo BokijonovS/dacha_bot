@@ -7,7 +7,6 @@ from keyboards.default import phone_button
 from keyboards.inline import menu_buttons
 
 
-
 USER_DATA = {}
 
 
@@ -54,11 +53,15 @@ def save_user(message: Message):
     user.save()
     del USER_DATA[from_user_id]
     bot.send_message(chat_id, "Ro'yxatdan o'tdingiz", reply_markup=ReplyKeyboardRemove())
-    bot.send_photo(chat_id, photo="sources/img.png", caption="Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons())
+    user_tg_id = message.from_user.id
+    user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
+    bot.send_photo(chat_id, photo="sources/img.png", caption="Botga xush kelibsiz, tilni tanlang", reply_markup=menu_buttons(user_uuid))
 
 
 @bot.message_handler(func=lambda message: message.text == "Bosh menyu")
 def menu(message: Message):
     chat_id = message.chat.id
     bot.send_message(chat_id, "Bosh menyuga qaytdingiz", reply_markup=ReplyKeyboardRemove())
-    bot.send_message(chat_id, "China botga hush kelibsiz", reply_markup=menu_buttons())
+    user_tg_id = message.from_user.id
+    user_uuid = TgUser.objects.get(telegram_id=user_tg_id).uuid
+    bot.send_message(chat_id, "China botga hush kelibsiz", reply_markup=menu_buttons(user_uuid))
